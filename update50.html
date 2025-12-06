@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thư viện cúc cu ⚡⚡ (Full + Background)</title>
+
+<link rel="preconnect" href="https://i.supaimg.com"> 
+
+<style>
+body {
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    color:#333;
+    overflow-x:hidden;
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    position:relative;
+}
+body.lock-scroll {overflow:hidden;}
+
+#mainBackgroundOverlay {
+    position:fixed;
+    inset:0;
+    z-index:-1; 
+    backdrop-filter: blur(8px); 
+    background:rgba(255,255,255,0.5); 
+    opacity: 1; 
+    transition: opacity 0.5s ease;
+}
+
+header {
+    background-color:#fff;
+    padding:10px 20px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    position:sticky;
+    top:0;
+    z-index:1000;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+header h1 {color:#e60023;font-size:24px;margin:0;font-weight:800;letter-spacing:-1px;}
+.datetime {font-size:14px;font-weight:600;color:#666;text-align:right;}
+.datetime span {display:block;line-height:1.2;}
+
+#socialLinks {
+    position: fixed;
+    bottom: 20px; 
+    left: 20px; 
+    z-index: 3001; 
+    width: auto; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start; 
+    padding: 0;
+}
+#socialLinks a {
+    display: block;
+    width: 120px; 
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 10px;
+    text-decoration: none; 
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, opacity 0.2s;
+}
+#tiktokLink {background: #000; border: 3px solid #fff; color: #fff;}
+#facebookLink {background: #1877F2; border: 3px solid #fff; color: #fff;}
+#socialLinks a:active {transform: scale(0.98);}
+
+#dailyBanner{
+    display:flex;
+    justify-content:flex-start;
+    gap:15px;
+    padding:18px;
+    position:fixed;
+    top:45px;
+    left:50%;
+    transform:translateX(-50%);
+    max-width:500px;
+    width:89%;
+    z-index:999;
+    background:rgba(255,255,255,0.7); 
+    backdrop-filter:blur(10px); 
+    border-radius:0 0 16px 16px;
+    border:1px solid rgba(255,255,255,0.8);
+    box-shadow:0 4px 20px rgba(0,0,0,0.2),0 0 15px rgba(255,255,255,0.4) inset;
+    overflow-x:auto;
+    white-space:nowrap;
+    transition:opacity 0.5s;
+}
+#dailyBanner::-webkit-scrollbar {display:none;}
+#dailyBanner img{width:160px;height:220px;flex-shrink:0;object-fit:cover;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.3);border:none;transition:transform 0.3s,box-shadow 0.3s;cursor:pointer;}
+#dailyBanner img:hover{transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.5);}
+.banner-label {position:fixed;left:50%;transform:translateX(-50%);padding:6px 12px;background:#e60023;border-radius:8px;color:#fff;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:1100;white-space:nowrap;transition:opacity 0.5s;}
+
+main {padding-top:295px;transition:padding-top 0.5s;}
+.gallery-container {max-width:1200px;margin:0 auto;padding:10px;column-count:2;column-gap:15px;opacity:0;transition:opacity 0.5s;}
+@media (min-width:768px){.gallery-container{column-count:3;}}
+.image-frame {
+    break-inside:avoid-column;
+    width:100%;
+    margin-bottom:15px;
+    border-radius:16px;
+    overflow:hidden;
+    background-color:#fff;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    cursor:pointer;
+    position:relative;
+    transition:box-shadow .3s,transform .3s;
+}
+.image-frame:hover {box-shadow:0 8px 16px rgba(0,0,0,0.3);transform:translateY(-5px);}
+
+.image-frame.loading {min-height: 250px; background-color: #f0f0f0; position: relative; display: flex; justify-content: center; align-items: center;}
+.image-frame.loading img:not(.user-avatar) {opacity: 0; transition: opacity 0.4s ease;}
+.image-frame img:not(.user-avatar) {width: 100%; height: auto; display: block; object-fit: cover; opacity: 1; transition: opacity 0.4s ease;}
+
+.spinner {position: absolute; border: 4px solid #f3f3f3; border-top: 4px solid #e60023; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; z-index: 10;}
+@keyframes spin {0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}
+
+.user-avatar {position:absolute;bottom:10px;right:10px;width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,0.4);transition:transform 0.3s;z-index:5;object-fit:cover;}
+.image-frame:hover .user-avatar {transform:scale(1.1);}
+.pagination{display:flex;justify-content:center;gap:8px;margin:20px 0 40px 0;}
+.pagination button{padding:8px 14px;border:none;border-radius:8px;background:#e60023;color:#fff;cursor:pointer;font-weight:600;transition:0.2s;}
+.pagination button:hover{background:#ad081b;transform:scale(1.05);}
+.pagination button.active{background:#ff3b5c;}
+
+#imageModal{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:2000;justify-content:center;align-items:center;flex-direction:column;opacity:0;visibility:hidden;transition:opacity 0.4s ease,visibility 0.4s;}
+#imageModal.visible{opacity:1;visibility:visible;}
+#modalImg{max-width:90%;max-height:85%;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.7);object-fit:contain;cursor:default;transform:scale(0.8);transition:transform 0.4s cubic-bezier(0.25,0.8,0.25,1);}
+#imageModal.visible #modalImg{transform:scale(1);}
+#closeBtn{margin-top:20px;padding:12px 25px;background:#e60023;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;opacity:0;transition:transform 0.2s,opacity 0.3s,background-color 0.3s;}
+#closeBtn:hover{transform:scale(1.05);background:#ad081b;}
+#imageModal.visible #closeBtn{opacity:1;}
+
+#welcomeScreen {position: fixed; inset: 0; z-index: 3000; display: flex; justify-content: center; align-items: center; flex-direction: column; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); opacity: 1; transition: opacity 0.8s ease;}
+#welcomeText {font-size: 30px; font-weight: 900; color: #fff; opacity: 0; transform: translateY(-20px) scale(0.95); transition: opacity 1.2s ease, transform 1.2s ease; text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(230, 0, 35, 0.5); letter-spacing: 5px; }
+#welcomeScreen.fading-out {opacity: 0; pointer-events: none; backdrop-filter: blur(0px); }
+#welcomeScreen.fading-out #welcomeText {opacity: 0 !important; transform: translateY(20px) scale(1.05); }
+
+#credit {position: fixed; bottom: 10px; right: 10px; font-size: 14px; color: #fff; z-index: 9999;}
+</style>
+</head>
+<body class="lock-scroll">
+
+<header>
+<h1>Thư viện cúc cu 🌸</h1>
+<div class="datetime">
+<span id="currentDate"></span>
+<span id="currentTime"></span>
+</div>
+</header>
+
+<div id="mainBackgroundOverlay"></div> 
+
+<div id="welcomeScreen">
+    <span id="welcomeText">Thư viện cúc cu 🔞</span>
+</div>
+
+<div id="socialLinks" style="opacity: 0; pointer-events: none; transition: opacity 0.5s;">
+    <a href="#" onclick="openSocialImage('https://i.supaimg.com/ce5666cd-e93a-4e2c-86dc-a07fdb4a1eea.jpg')" id="tiktokLink">Tik tok</a>
+    <a href="#" onclick="openSocialImage('https://i.supaimg.com/8968b9c8-8cb8-4721-98e7-80e961e9bce2.jpg')" id="facebookLink">Facebook</a>
+</div>
+
+<div id="dailyBanner" style="display:none"></div>
+<div class="banner-label" id="fixedBannerLabel" style="display:none">ĐỀ XUẤT HÔM NAY</div>
+
+<main>
+<div class="gallery-container" id="imageGallery"></div>
+<div class="pagination" id="pagination"></div>
+</main>
+
+<div id="imageModal">
+<img id="modalImg" src="">
+<button id="closeBtn">Đóng</button>
+</div>
+<div id="credit">© 2025 Văn Tưởng</div>
+
+<script>
+const gallery=document.getElementById('imageGallery');
+const imageModal=document.getElementById('imageModal');
+const modalImg=document.getElementById('modalImg');
+const closeBtn=document.getElementById('closeBtn');
+const dailyBanner=document.getElementById('dailyBanner');
+const fixedBannerLabel=document.getElementById('fixedBannerLabel');
+const main=document.querySelector('main');
+const bodyElement=document.body;
+const socialLinks = document.getElementById('socialLinks'); 
+const welcomeScreen = document.getElementById('welcomeScreen'); 
+const welcomeText = document.getElementById('welcomeText'); 
+
+const IMAGES_PER_BANNER=3;
+const IMAGES_PER_PAGE=10;
+const AVATAR_LINK="https://i.supaimg.com/a2d58894-47d1-4f24-9c9a-2733948faabe.png";
+let currentPage=1;
+let allGalleryImages = []; 
+
+// --- ĐÃ CHỈNH SỬA: Link JSON sử dụng pass.json ---
+const JSON_LINK = "pass.json"; 
+
+function setBannerLabelPosition(){
+    const labelHeight=30;
+    const offsetFromBottom=11;
+    const bannerBottomPosition=45+18+220+18;
+    const finalTop=bannerBottomPosition-(labelHeight/2)-offsetFromBottom;
+    fixedBannerLabel.style.top=`${finalTop}px`;
+}
+
+function showDailyBanner(bannerImages){
+    dailyBanner.innerHTML='';
+    bannerImages.slice(0,IMAGES_PER_BANNER).forEach(link=>{
+        const img=document.createElement('img');
+        img.src=link;
+        img.onclick=e=>{e.stopPropagation();openImage(link)};
+        dailyBanner.appendChild(img);
+    });
+    dailyBanner.style.display='flex';
+    fixedBannerLabel.style.display='block';
+    setBannerLabelPosition();
+}
+
+function initializeContent(data){
+    // 1. Gán Background từ data.background
+    if (data.background) {
+        bodyElement.style.backgroundImage = `url('${data.background}')`;
+    }
+    
+    // 2. Chia ảnh cho Banner và Gallery từ data.images
+    const allImages = data.images || []; 
+    const bannerImages = allImages.slice(0, IMAGES_PER_BANNER * 2); 
+    const galleryImages = allImages; 
+
+    showDailyBanner(bannerImages);
+    allGalleryImages = galleryImages; 
+    displayPage(currentPage, allGalleryImages);
+}
+
+function displayPage(page,images){
+    gallery.classList.remove('visible');
+    setTimeout(()=>{
+        gallery.innerHTML='';
+        const start=(page-1)*IMAGES_PER_PAGE;
+        const end=start+IMAGES_PER_PAGE;
+        images.slice(start,end).forEach((link,index)=>{
+            const frame=document.createElement('div');
+            frame.className='image-frame loading';
+            const spinner = document.createElement('div'); spinner.className = 'spinner';
+            const img=document.createElement('img'); img.alt='Ảnh '+(start+index+1);
+            img.onload = () => { frame.classList.remove('loading'); if(spinner.parentNode){frame.removeChild(spinner);} };
+            img.src=link;
+            const avatar=document.createElement('img'); avatar.className='user-avatar'; avatar.src=AVATAR_LINK;
+            frame.appendChild(spinner); frame.appendChild(img); frame.appendChild(avatar);
+            frame.onclick=()=>{openImage(link);};
+            gallery.appendChild(frame);
+        });
+        gallery.classList.add('visible');
+        updateBannerVisibility(page);
+        setupPagination(images,page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },200);
+}
+
+function updateBannerVisibility(page){
+    if(page===1){
+        dailyBanner.style.opacity='1';
+        dailyBanner.style.pointerEvents='auto';
+        fixedBannerLabel.style.opacity='1';
+        main.style.paddingTop='295px';
+    }else{
+        dailyBanner.style.opacity='0';
+        dailyBanner.style.pointerEvents='none';
+        fixedBannerLabel.style.opacity='0';
+        main.style.paddingTop='40px';
+    }
+}
+
+function setupPagination(images,current){
+    const pagination=document.getElementById('pagination');pagination.innerHTML='';
+    const totalPages=Math.ceil(images.length/IMAGES_PER_PAGE);
+    for(let i=1;i<=totalPages;i++){
+        const btn=document.createElement('button');btn.textContent=i;if(i===current)btn.classList.add('active');
+        btn.onclick=()=>{if(i!==currentPage){currentPage=i;displayPage(currentPage, images);}}
+        pagination.appendChild(btn);
+    }
+}
+
+function openImage(link){ modalImg.src=link; imageModal.classList.add('visible'); document.body.classList.add('lock-scroll'); }
+function closeImage(){ imageModal.classList.remove('visible'); document.body.classList.remove('lock-scroll'); setTimeout(()=>{modalImg.src='';},400); }
+closeBtn.onclick=closeImage; imageModal.onclick=e=>{if(e.target.id==='imageModal'||e.target.id==='closeBtn'){closeImage();}};
+document.addEventListener('keydown',e=>{if(e.key==="Escape"&&imageModal.classList.contains('visible')){closeImage();}});
+function openSocialImage(link){ openImage(link); }
+
+function showWelcomeScreen() {
+    setTimeout(() => { welcomeText.style.opacity = '1'; welcomeText.style.transform = 'translateY(0px) scale(1)'; }, 100);
+    setTimeout(() => {
+        welcomeScreen.classList.add('fading-out');
+        setTimeout(() => {
+            bodyElement.classList.remove('lock-scroll');
+            // --- LỆNH FETCH SỬ DỤNG JSON_LINK = "pass.json" ---
+            fetch(JSON_LINK)
+            .then(res => {
+                if (!res.ok) throw new Error('Lỗi tải pass.json: ' + res.status);
+                return res.json();
+            })
+            .then(data=>{ 
+                initializeContent(data); 
+            })
+            .catch(err=>{ 
+                console.error('Không load được pass.json', err); 
+                alert('Lỗi: Không thể tải thư viện ảnh. Vui lòng kiểm tra file pass.json đã được đặt đúng thư mục chưa.');
+            });
+            // --- Kết thúc fetch JSON ---
+            
+            socialLinks.style.opacity = '1';
+            socialLinks.style.pointerEvents = 'auto';
+        }, 800);
+    }, 2000);
+}
+
+function updateDateTime(){
+    const now=new Date();
+    document.getElementById('currentDate').textContent=now.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+    document.getElementById('currentTime').textContent=now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateDateTime,1000);
+updateDateTime();
+window.onload = function() { showWelcomeScreen(); };
+</script>
+</body>
+</html>

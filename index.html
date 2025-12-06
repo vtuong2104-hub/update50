@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Đăng nhập - Bảo vệ</title>
+
+<meta property="og:title" content="Thư viện cúc cu 🌸🌸" />
+<meta property="og:description" content="Trang lưu trữ cực mạnh. Vào là biết liền. 😎" />
+<meta property="og:image" content="https://i.supaimg.com/e7d70110-a250-4cf3-8284-2be345722f3e.png" />
+<meta property="og:url" content="https://vtuong2104-hub.github.io/update50/" />
+<meta name="theme-color" content="#fa5eff" />
+
+<style>
+body { 
+    margin:0; 
+    font-family:'Segoe UI',sans-serif; 
+    overflow:hidden; 
+    height:100vh; 
+    background-size:cover; 
+    background-position:center; 
+    position:relative; 
+    background-image: url('https://i.supaimg.com/66a117c6-27a0-4914-8d75-084670180e16.jpg'); 
+} 
+
+#overlayBg { position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter: blur(15px); z-index:999; }
+#infoText { position:fixed; top:15px; right:15px; color:rgba(255,255,255,0.95); font-size:13px; font-weight:600; z-index:1001; text-shadow:0 1px 4px rgba(0,0,0,0.5); background:rgba(0,0,0,0.2); padding:6px 10px; border-radius:12px; }
+#securityNote { position:fixed; bottom:10px; left:10px; color:rgba(255,255,255,0.8); font-size:11px; z-index:1001; text-shadow:0 1px 2px rgba(0,0,0,0.6); background:rgba(0,0,0,0.3); padding:5px 10px; border-radius:8px; max-width:350px; line-height:1.4; }
+
+#tiktokButton { position:fixed; top:15px; left:15px; z-index:1001; cursor:pointer; padding:8px 12px; background:#25f4ee; border-radius:14px; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:0.3s ease; display:flex; align-items:center; font-weight:700; color:#121212; text-decoration:none; }
+#tiktokButton:hover { transform:scale(1.05); box-shadow:0 6px 16px rgba(0,0,0,0.4); }
+#tiktokButton span { margin-left:8px; font-size:14px; }
+.tiktok-icon { font-size:20px; line-height:1; display:inline-block; color:#ff0050; text-shadow:1px 0 0 #121212, -1px 0 0 #121212; }
+
+#passPopup { position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(1);
+    width:280px; background:rgba(255,255,255,0.7); backdrop-filter:blur(18px); border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index:1000; display:flex; flex-direction:column; align-items:center; padding:30px 25px; 
+    opacity:1;
+}
+#passPopup img { width:80px; height:80px; border-radius:50%; margin-bottom:20px; border:3px solid #ff0050; box-shadow:0 0 10px rgba(255,0,80,0.5); }
+#passPopup input { width:100%; box-sizing:border-box; padding:12px; border-radius:18px; border:1px solid rgba(0,0,0,0.15); margin-bottom:15px; font-size:16px; outline:none; background:rgba(255,255,255,0.8); transition:0.3s; text-align:center; }
+#passPopup input:focus { border-color:#ff0050; background:rgba(255,255,255,0.95); box-shadow:0 0 8px rgba(255,0,80,0.3); }
+#passPopup button { width:65%; padding:12px; border:none; border-radius:20px; background:#ff0050; color:#fff; font-weight:700; cursor:pointer; transition:0.3s ease-in-out; box-shadow:0 5px 15px rgba(0,0,0,0.3); text-transform:uppercase; }
+#passPopup button:hover { background:#cc0040; transform:scale(1.05) translateY(-2px); }
+#errorMsg { color:#ff0050; font-size:14px; height:20px; margin-bottom:10px; text-align:center; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div id="overlayBg"></div>
+
+<a id="tiktokButton" href="https://www.tiktok.com/@tng.2104?_r=1&_t=ZS-91xuuR8hg6a" target="_blank">
+    <span class="tiktok-icon">T</span>
+    <span>TikTok</span> 
+</a>
+
+<div id="infoText">Vui lòng inbox tik tok chủ web để lấy pass</div>
+<div id="securityNote">⚠️ **Cảnh báo:** Website này có nội dung không lành mạnh và không an toàn cho trẻ dưới 18 tuổi 🔞. Để an toàn, chúng tôi buộc phải sử dụng bảo mật.</div>
+
+<div id="passPopup">
+    <img src="https://i.supaimg.com/e22253cd-07b7-480d-8d77-9a370f7eb254.jpg" alt="Avatar">
+    <input type="password" id="passInput" placeholder="Nhập mật khẩu" autocomplete="new-password" autofocus>
+    <div id="errorMsg"></div>
+    <button id="submitBtn">Xác nhận</button>
+</div>
+
+<script>
+// --- CLEAR INPUT KHI LOAD, FIX CACHE AUTOFILL ---
+window.onload = () => {
+    const passInput = document.getElementById('passInput');
+    passInput.value = '';
+    passInput.focus();
+};
+
+// --- CHỨC NĂNG CHECK PASS ---
+const correctPass ="9090"; 
+const wedFile = "update50.html"; 
+
+const checkPassword = () => {
+    const input = document.getElementById('passInput').value.trim();
+    const errorMsg = document.getElementById('errorMsg');
+
+    if(input === ''){
+        errorMsg.textContent='Vui lòng nhập mật khẩu 🤫';
+        return;
+    }
+
+    if(input === correctPass){
+        window.location.href = wedFile; 
+    } else {
+        errorMsg.textContent='Sai mật khẩu hoặc mật khẩu đã hết hạn 🔒';
+    }
+};
+
+document.getElementById('submitBtn').onclick = checkPassword; 
+
+document.getElementById('passInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') checkPassword();
+});
+</script>
+
+</body>
+</html>
