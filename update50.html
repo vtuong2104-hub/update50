@@ -201,8 +201,10 @@ const AVATAR_LINK="https://i.supaimg.com/a2d58894-47d1-4f24-9c9a-2733948faabe.pn
 let currentPage=1;
 let allGalleryImages = []; 
 
-// --- ĐÃ CHỈNH SỬA: Link JSON sử dụng pass.json ---
-const JSON_LINK = "pass.json"; 
+const JSON_LINK = "https://github.com/vtuong2104-hub/update50/blob/main/pass.json"; 
+const FIXED_BG = "https://i.supaimg.com/bbf7e154-0073-4c87-8d63-2ab41c38515f.jpg"; 
+
+function setRandomBackgrounds(){ bodyElement.style.backgroundImage = `url('${FIXED_BG}')`; }
 
 function setBannerLabelPosition(){
     const labelHeight=30;
@@ -226,18 +228,9 @@ function showDailyBanner(bannerImages){
 }
 
 function initializeContent(data){
-    // 1. Gán Background từ data.background
-    if (data.background) {
-        bodyElement.style.backgroundImage = `url('${data.background}')`;
-    }
-    
-    // 2. Chia ảnh cho Banner và Gallery từ data.images
-    const allImages = data.images || []; 
-    const bannerImages = allImages.slice(0, IMAGES_PER_BANNER * 2); 
-    const galleryImages = allImages; 
-
-    showDailyBanner(bannerImages);
-    allGalleryImages = galleryImages; 
+    const allImages = [...data.gallery];
+    showDailyBanner(data.banner);
+    allGalleryImages = allImages; 
     displayPage(currentPage, allGalleryImages);
 }
 
@@ -251,7 +244,7 @@ function displayPage(page,images){
             const frame=document.createElement('div');
             frame.className='image-frame loading';
             const spinner = document.createElement('div'); spinner.className = 'spinner';
-            const img=document.createElement('img'); img.alt='Ảnh '+(start+index+1);
+            const img=document.createElement('img'); img.alt='Ảnh '+(index+1);
             img.onload = () => { frame.classList.remove('loading'); if(spinner.parentNode){frame.removeChild(spinner);} };
             img.src=link;
             const avatar=document.createElement('img'); avatar.className='user-avatar'; avatar.src=AVATAR_LINK;
@@ -302,21 +295,10 @@ function showWelcomeScreen() {
         welcomeScreen.classList.add('fading-out');
         setTimeout(() => {
             bodyElement.classList.remove('lock-scroll');
-            // --- LỆNH FETCH SỬ DỤNG JSON_LINK = "pass.json" ---
             fetch(JSON_LINK)
-            .then(res => {
-                if (!res.ok) throw new Error('Lỗi tải pass.json: ' + res.status);
-                return res.json();
-            })
-            .then(data=>{ 
-                initializeContent(data); 
-            })
-            .catch(err=>{ 
-                console.error('Không load được pass.json', err); 
-                alert('Lỗi: Không thể tải thư viện ảnh. Vui lòng kiểm tra file pass.json đã được đặt đúng thư mục chưa.');
-            });
-            // --- Kết thúc fetch JSON ---
-            
+            .then(res=>res.json())
+            .then(data=>{ initializeContent(data); })
+            .catch(err=>{ console.error('Không load được pass.json', err); });
             socialLinks.style.opacity = '1';
             socialLinks.style.pointerEvents = 'auto';
         }, 800);
@@ -330,7 +312,7 @@ function updateDateTime(){
 }
 setInterval(updateDateTime,1000);
 updateDateTime();
-window.onload = function() { showWelcomeScreen(); };
+window.onload = function() { setRandomBackgrounds(); showWelcomeScreen(); };
 </script>
 </body>
 </html>
