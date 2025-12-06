@@ -45,6 +45,7 @@ header h1 {color:#e60023;font-size:24px;margin:0;font-weight:800;letter-spacing:
 .datetime {font-size:14px;font-weight:600;color:#666;text-align:right;}
 .datetime span {display:block;line-height:1.2;}
 
+/* --- ĐÃ CHỈNH SỬA CHO NÚT NHỎ LẠI --- */
 #socialLinks {
     position: fixed;
     bottom: 20px; 
@@ -53,23 +54,25 @@ header h1 {color:#e60023;font-size:24px;margin:0;font-weight:800;letter-spacing:
     width: auto; 
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px; /* Giảm khoảng cách giữa các nút */
     align-items: flex-start; 
     padding: 0;
 }
 #socialLinks a {
     display: block;
-    width: 120px; 
+    width: 100px; /* Giảm chiều rộng của nút (từ 120px) */
     text-align: center;
-    padding: 10px 0;
-    border-radius: 10px;
+    padding: 8px 0; /* Giảm padding (chiều cao) của nút (từ 10px 0) */
+    border-radius: 8px; /* Giảm nhẹ bo góc (từ 10px) */
     text-decoration: none; 
-    font-size: 15px;
+    font-size: 14px; /* Giảm nhẹ kích thước chữ (từ 15px) */
     font-weight: 700;
     color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3); /* Giảm nhẹ đổ bóng */
     transition: transform 0.2s, opacity 0.2s;
 }
+/* ------------------------------------- */
+
 #tiktokLink {background: #000; border: 3px solid #fff; color: #fff;}
 #facebookLink {background: #1877F2; border: 3px solid #fff; color: #fff;}
 #socialLinks a:active {transform: scale(0.98);}
@@ -195,16 +198,24 @@ const socialLinks = document.getElementById('socialLinks');
 const welcomeScreen = document.getElementById('welcomeScreen'); 
 const welcomeText = document.getElementById('welcomeText'); 
 
-const IMAGES_PER_BANNER=3;
+const IMAGES_PER_BANNER=3; 
 const IMAGES_PER_PAGE=10;
 const AVATAR_LINK="https://i.supaimg.com/a2d58894-47d1-4f24-9c9a-2733948faabe.png";
 let currentPage=1;
 let allGalleryImages = []; 
 
-const JSON_LINK = "https://github.com/vtuong2104-hub/update50/blob/main/pass.json"; 
-const FIXED_BG = "https://i.supaimg.com/bbf7e154-0073-4c87-8d63-2ab41c38515f.jpg"; 
+// Đã sửa: Sử dụng Raw URL để tải file pass.json từ GitHub
+const JSON_LINK = "https://raw.githubusercontent.com/vtuong2104-hub/update50/main/pass.json"; 
 
-function setRandomBackgrounds(){ bodyElement.style.backgroundImage = `url('${FIXED_BG}')`; }
+// --- HÀM XÁO TRỘN MẢNG (Fisher-Yates) ---
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+// ------------------------------------------
 
 function setBannerLabelPosition(){
     const labelHeight=30;
@@ -228,14 +239,40 @@ function showDailyBanner(bannerImages){
 }
 
 function initializeContent(data){
-    const allImages = [...data.gallery];
-    showDailyBanner(data.banner);
-    allGalleryImages = allImages; 
+    // 1. Gán Background từ data.background
+    if (data.background) {
+        bodyElement.style.backgroundImage = `url('${data.background}')`;
+    }
+    
+    let allImages = data.images || []; 
+    
+    // BƯỚC 1: Xáo trộn toàn bộ mảng ảnh
+    allImages = shuffleArray(allImages); 
+    
+    // BƯỚC 2: Tách mảng để Banner không lấy ảnh từ Trang 1
+    
+    // Gallery sử dụng toàn bộ ảnh đã xáo trộn
+    const galleryImages = allImages;
+    
+    // Banner lấy ảnh từ những ảnh sau Trang 1, sau đó tự xáo trộn lại
+    let potentialBannerImages = allImages.slice(IMAGES_PER_PAGE); 
+    potentialBannerImages = shuffleArray(potentialBannerImages); 
+    
+    // Lấy số lượng ảnh Banner cần thiết
+    const bannerImages = potentialBannerImages.slice(0, IMAGES_PER_BANNER); 
+
+    
+    showDailyBanner(bannerImages);
+    allGalleryImages = galleryImages; 
     displayPage(currentPage, allGalleryImages);
+    
+    // Khi dữ liệu được load, làm mờ overlay để lộ background
+    const overlay = document.getElementById('mainBackgroundOverlay');
+    if (overlay) overlay.style.opacity = '0';
 }
 
 function displayPage(page,images){
-    gallery.classList.remove('visible');
+    gallery.style.opacity='0'; 
     setTimeout(()=>{
         gallery.innerHTML='';
         const start=(page-1)*IMAGES_PER_PAGE;
@@ -244,15 +281,34 @@ function displayPage(page,images){
             const frame=document.createElement('div');
             frame.className='image-frame loading';
             const spinner = document.createElement('div'); spinner.className = 'spinner';
-            const img=document.createElement('img'); img.alt='Ảnh '+(index+1);
-            img.onload = () => { frame.classList.remove('loading'); if(spinner.parentNode){frame.removeChild(spinner);} };
+            const img=document.createElement('img'); img.alt='Ảnh '+(start+index+1);
+            
+            // Xóa spinner và gỡ trạng thái loading khi ảnh load xong
+            img.onload = () => { 
+                frame.classList.remove('loading'); 
+                if(spinner.parentNode){
+                    frame.removeChild(spinner);
+                } 
+            };
+            
+            // Xử lý lỗi load ảnh (ví dụ: ảnh bị xóa hoặc URL sai)
+            img.onerror = () => {
+                console.warn(`Không tải được ảnh: ${link}`);
+                frame.classList.remove('loading');
+                if(spinner.parentNode){
+                    frame.removeChild(spinner);
+                }
+                frame.style.backgroundColor = '#ffdddd'; // Dấu hiệu ảnh lỗi
+            };
+
+
             img.src=link;
             const avatar=document.createElement('img'); avatar.className='user-avatar'; avatar.src=AVATAR_LINK;
             frame.appendChild(spinner); frame.appendChild(img); frame.appendChild(avatar);
             frame.onclick=()=>{openImage(link);};
             gallery.appendChild(frame);
         });
-        gallery.classList.add('visible');
+        gallery.style.opacity='1'; // Hiện gallery
         updateBannerVisibility(page);
         setupPagination(images,page);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -295,10 +351,21 @@ function showWelcomeScreen() {
         welcomeScreen.classList.add('fading-out');
         setTimeout(() => {
             bodyElement.classList.remove('lock-scroll');
+            // --- LỆNH FETCH SỬ DỤNG JSON_LINK ĐÃ SỬA ---
             fetch(JSON_LINK)
-            .then(res=>res.json())
-            .then(data=>{ initializeContent(data); })
-            .catch(err=>{ console.error('Không load được pass.json', err); });
+            .then(res => {
+                if (!res.ok) throw new Error('Lỗi tải pass.json: ' + res.status);
+                return res.json();
+            })
+            .then(data=>{ 
+                initializeContent(data); 
+            })
+            .catch(err=>{ 
+                console.error('Không load được pass.json', err); 
+                alert('Lỗi: Không thể tải thư viện ảnh. Vui lòng kiểm tra kết nối mạng hoặc đường dẫn file pass.json.');
+            });
+            // --- Kết thúc fetch JSON ---
+            
             socialLinks.style.opacity = '1';
             socialLinks.style.pointerEvents = 'auto';
         }, 800);
@@ -312,7 +379,7 @@ function updateDateTime(){
 }
 setInterval(updateDateTime,1000);
 updateDateTime();
-window.onload = function() { setRandomBackgrounds(); showWelcomeScreen(); };
+window.onload = function() { showWelcomeScreen(); };
 </script>
 </body>
 </html>
